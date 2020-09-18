@@ -1,9 +1,12 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Classes from "./ContactData.css";
 import Button from "../../../components/UI/Button/Button";
 import axios from "../../../axios-orders";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
+import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
+import * as ContactActions from "../../../store/actions/index";
 class ContactData extends Component {
   state = {
     orderForm: {
@@ -16,8 +19,6 @@ class ContactData extends Component {
         value: "",
         validation: {
           required: true,
-          minLength: 5,
-          maxLength: 8,
         },
         valid: false,
         touched: false,
@@ -31,8 +32,6 @@ class ContactData extends Component {
         value: "",
         validation: {
           required: true,
-          minLength: 5,
-          maxLength: 10,
         },
         valid: false,
         touched: false,
@@ -46,8 +45,9 @@ class ContactData extends Component {
         value: "",
         validation: {
           required: true,
-          minLength: 5,
-          maxLength: 10,
+          minLength: 6,
+          maxLength: 6,
+          isNumeric: true
         },
         valid: false,
         touched: false,
@@ -61,8 +61,6 @@ class ContactData extends Component {
         value: "",
         validation: {
           required: true,
-          minLength: 5,
-          maxLength: 10,
         },
         valid: false,
         touched: false,
@@ -77,8 +75,7 @@ class ContactData extends Component {
         value: "",
         validation: {
           required: true,
-          minLength: 5,
-          maxLength: 10,
+          isEmail: true
         },
         valid: false,
         touched: false,
@@ -91,49 +88,50 @@ class ContactData extends Component {
             { value: "chaeapest", displayValue: "Cheapest" },
           ],
         },
-        value: "",
+        value: "fastest",
         valid:true
       },
     },
     formIsValid: false,
-    loading: false,
   };
   orderHandler = (event) => {
     console.log(this.props.price);
     event.preventDefault();
-    this.setState({ loading: true });
     const formData = {};
     for (let ele in this.state.orderForm) {
       formData[ele] = this.state.orderForm[ele].value;
     }
     const data = {
-      ingredients: this.props.ingredients,
+      ingredients: this.props.ings,
       price: this.props.price,
       orderData: formData,
     };
-    console.log(data);
-    axios
-      .post("/orders.json", data)
-      .then((res) => {
-        this.setState({ loading: false });
-        this.props.history.push("/");
-        console.log(res);
-      })
-      .catch((err) => {
-        this.setState({ loading: false });
-      });
+    this.props.onOrderBurger(data);
+ 
   };
   checkValidity(value, rules) {
     let isValid = true;
-    if (rules && rules.required) {
+    if (!rules) {
+      return true;
+  }
+    if (rules.required) {
       isValid = value.trim() !== "" && isValid;
     }
-    if (rules && rules.minLength) {
+    if (rules.minLength) {
       isValid = value.length >= rules.minLength && isValid;
     }
-    if (rules && rules.maxLength) {
+    if (rules.maxLength) {
       isValid = value.length <= rules.maxLength && isValid;
     }
+    if (rules.isEmail) {
+      const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+      isValid = pattern.test(value) && isValid
+  }
+
+  if (rules.isNumeric) {
+      const pattern = /^\d+$/;
+      isValid = pattern.test(value) && isValid
+  }
     return isValid;
   }
 
@@ -188,7 +186,7 @@ class ContactData extends Component {
         <Button btntype="Success" disabled={!this.state.formIsValid}>Order</Button>
       </form>
     );
-    if (this.state.loading) form = <Spinner />;
+    if (this.props.loading) form = <Spinner />;
     return (
       <div className={Classes.ContactData}>
         <h4>Enter Your Contact Data</h4>
@@ -198,4 +196,16 @@ class ContactData extends Component {
     );
   }
 }
-export default ContactData;
+const mapToProps = (state) => {
+  return {
+    ings: state.burgerBuilder.ingredients,
+    price: state.burgerBuilder.totalPrice,
+    laoding:state.order.loading
+  };
+};
+const mapDispatch = (dispatch) => {
+  return {
+    onOrderBurger:(orderData)=>dispatch(ContactActions.purchaseBurger(orderData))
+  };
+};
+export default connect(mapToProps,mapDispatch)(withErrorHandler( ContactData,axios));
