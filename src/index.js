@@ -7,12 +7,14 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import BurgerBuilderreducer from "./store/reducers/BurgerBuilder";
 import orderReducer from './store/reducers/order'
+import authReducer from './store/reducers/auth'
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const rootReducer= combineReducers({
   burgerBuilder:BurgerBuilderreducer,
-  order:orderReducer
+  order:orderReducer,
+  auth:authReducer
 });
 const store= createStore(rootReducer, composeEnhancers(
   applyMiddleware(thunk)
