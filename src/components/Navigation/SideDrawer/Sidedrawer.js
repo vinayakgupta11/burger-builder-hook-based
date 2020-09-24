@@ -5,7 +5,6 @@ import Navigationitems from '../Navigationitems/Navigationitems'
 import Backdrop from '../../UI/Backdrop/Backdrop'
 import Aux from '../../../hoc/Auxillary/Auxillary'
 const sidedrawer= (props)=>{
-    console.log(props.open);
     let attachedClasses=[Classes.SideDrawer, Classes.Close];
     if(props.open)
     {
@@ -14,7 +13,7 @@ const sidedrawer= (props)=>{
     return (
        <Aux>
            <Backdrop show={props.open} clicked={props.closed}/>
-           <div className={attachedClasses.join(' ')}>
+           <div className={attachedClasses.join(' ')} onClick={props.closed}>
            <Logo height="11%"/>
            <nav>
                <Navigationitems isAuthenticated={props.isAuth}/>

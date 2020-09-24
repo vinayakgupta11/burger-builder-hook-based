@@ -7,6 +7,7 @@ import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
 import withErrorHandler from "../../../hoc/withErrorHandler/withErrorHandler";
 import * as ContactActions from "../../../store/actions/index";
+import { checkValidity } from "../../../shared/utility";
 class ContactData extends Component {
   state = {
     orderForm: {
@@ -95,7 +96,6 @@ class ContactData extends Component {
     formIsValid: false,
   };
   orderHandler = (event) => {
-    console.log(this.props.price);
     event.preventDefault();
     const formData = {};
     for (let ele in this.state.orderForm) {
@@ -110,31 +110,7 @@ class ContactData extends Component {
     this.props.onOrderBurger(data,this.props.token);
  
   };
-  checkValidity(value, rules) {
-    let isValid = true;
-    if (!rules) {
-      return true;
-  }
-    if (rules.required) {
-      isValid = value.trim() !== "" && isValid;
-    }
-    if (rules.minLength) {
-      isValid = value.length >= rules.minLength && isValid;
-    }
-    if (rules.maxLength) {
-      isValid = value.length <= rules.maxLength && isValid;
-    }
-    if (rules.isEmail) {
-      const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
-      isValid = pattern.test(value) && isValid
-  }
-
-  if (rules.isNumeric) {
-      const pattern = /^\d+$/;
-      isValid = pattern.test(value) && isValid
-  }
-    return isValid;
-  }
+ 
 
   inputchangeHandler = (event, inputidentifier) => {
     const updatedForm = {
@@ -145,19 +121,17 @@ class ContactData extends Component {
       ...updatedForm[inputidentifier],
     };
     updatedformEle.value = event.target.value;
-    updatedformEle.valid = this.checkValidity(
+    updatedformEle.valid = checkValidity(
       updatedformEle.value,
       updatedformEle.validation
     );
     updatedformEle.touched = true;
     updatedForm[inputidentifier] = updatedformEle;
-    console.log(updatedForm);
     let formValid=true;
     for(let inputidentifier in updatedForm)
     {
       formValid=updatedForm[inputidentifier].valid && formValid;
     }
-    console.log(formValid);
     this.setState({ orderForm: updatedForm, formIsValid:formValid });
   };
   render() {
